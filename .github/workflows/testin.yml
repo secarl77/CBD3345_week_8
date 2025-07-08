@@ -19,7 +19,7 @@ jobs:
       - name: Start Postgres container
         run: |
           docker run -d \
-            --name c0917329-db \
+            --name db \
             --network test-network \
             -e POSTGRES_USER=c0917329 \
             -e POSTGRES_PASSWORD=pass123 \
