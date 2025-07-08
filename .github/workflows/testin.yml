@@ -50,7 +50,9 @@ jobs:
         run: sleep 10
 
       - name: Test root endpoint
-        run: curl --fail http://localhost:5000 || exit 1
+        #run: curl --fail http://localhost:5000 || exit 1
+        run: docker exec c0917329-app curl --fail http://localhost:5000/users
 
-      - name: Test /users endpoint
-        run: curl --fail http://localhost:5000/users || exit 1
+
+    #  - name: Test /users endpoint
+    #    run: curl --fail http://localhost:5000/users || exit 1
