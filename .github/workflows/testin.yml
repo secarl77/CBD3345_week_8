@@ -9,25 +9,31 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: c0917329
-          POSTGRES_PASSWORD: pass123
-          POSTGRES_DB: mydb
-        ports:
-          - 5432:5432
-        options: >-
-          --name c0917329-db
-          --health-cmd="pg_isready -U c0917329"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Create docker network
+        run: docker network create test-network
+
+      - name: Start Postgres container
+        run: |
+          docker run -d \
+            --name c0917329-db \
+            --network test-network \
+            -e POSTGRES_USER=c0917329 \
+            -e POSTGRES_PASSWORD=pass123 \
+            -e POSTGRES_DB=mydb \
+            -p 5432:5432 \
+            postgres:15
+
       - name: Wait for PostgreSQL
-        run: sleep 15
+        run: |
+          for i in {1..10}; do
+            docker exec c0917329-db pg_isready -U c0917329 && break
+            echo "Waiting for Postgres to be ready..."
+            sleep 5
+          done
 
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
@@ -43,11 +49,18 @@ jobs:
           "
 
       - name: Run Flask app container
-        run: |
-          docker run -d --name c0917329-app -p 5000:5000 secarl/cbd3345-ica1
-
+        run:  |
+          docker run -d \
+            --name c0917329-app \
+            --network test-network \
+            -p 5000:5000 \
+            secarl/cbd3345-ica1
+            
       - name: Wait for app to start
-        run: sleep 10
+        run: sleep 20
+
+      - name: Check logs of Flask app container
+        run: docker logs c0917329-app
 
       - name: Test root endpoint
         #run: curl --fail http://localhost:5000 || exit 1
