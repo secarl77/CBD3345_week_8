@@ -44,9 +44,7 @@ jobs:
 
       - name: Run Flask app container
         run: |
-          docker run -d --name c0917329-app \
-            -p 5000:5000 \
-            secarl/cbd3345-ica1
+          docker run -d --name c0917329-app -p 5000:5000 secarl/cbd3345-ica1
 
       - name: Wait for app to start
         run: sleep 10
